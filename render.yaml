@@ -1,0 +1,30 @@
+# Render Blueprint（基础设施即代码）：把本文件放进仓库根目录，
+# 在 Render 控制台选「New」→「Blueprint」→连仓库即可一键按此配置部署。
+services:
+  - type: web
+    name: fqnovel-unidbg
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free                      # 免费档：512MB / 0.1 CPU / 750h 月，闲置 15 分钟休眠
+    branch: main
+    healthCheckPath: /api/fqnovel/health
+    envVars:
+      - key: PORT
+        generateValue: true        # Render 自动分配并注入，应用必须监听它
+      - key: APPLICATION_ADMIN_PASSWORD
+        sync: false                # 部署时手动填管理后台密码（不填则 /api/admin/auth 不可用）
+      - key: JAVA_OPTS
+        value: "-Xms96m -Xmx360m -XX:+UseSerialGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -noverify"
+      # 下面这些是为 512MB 极限省内存的开关，能关的都关了
+      - key: APPLICATION_UNIDBG_DYNARMIC
+        value: "false"
+      - key: APPLICATION_UNIDBG_ASYNC
+        value: "false"             # 关掉异步签名 WorkerPool，少开线程
+      - key: APPLICATION_UNIDBG_VERBOSE
+        value: "false"
+      - key: FQ_API_DEVICE_POOL_ENABLED
+        value: "false"             # 关设备池，避免一次生成多个设备吃内存（单设备签名仍可用）
+      - key: FQ_API_DEVICE_POOL_SIZE
+        value: "1"
+      - key: SPRING_REDIS_HOST
+        value: "0.0.0.0"           # 按原 README：设为 0.0.0.0 即禁用 Redis，免外部依赖
