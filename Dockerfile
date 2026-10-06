@@ -18,4 +18,4 @@ ENV JAVA_OPTS="-Xms96m -Xmx360m -XX:+UseSerialGC -XX:+TieredCompilation -XX:Tier
 EXPOSE 8099
 
 Render 会注入 PORT 环境变量，Spring Boot 必须监听它且绑定 0.0.0.0
-CMD exec java.JAVAOPTS−Dserver.port=JAVAO​PTS−Dserver.port={PORT:-8099} -jar /app/app.jar
+CMD exec java $JAVA_OPTS -Dserver.port=${PORT:-8099} -jar /app/app.jar
